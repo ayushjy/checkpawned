@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h2>Check If you have been pwned! </h2>
+
+    <input id="email" placeholder="Enter email">
+    <button onclick="check()">Check</button>
+
+
+    <div id="result-container"></div>
+
+    <script>
+        async function check() {
+            const email = document.getElementById("email").value;
+            const resultContainer = document.getElementById("result-container");
+            resultContainer.innerHTML = "Checking...";
+
+            try {
+                const res = await fetch(`http://127.0.0.1:5000/check?email=${email}`);
+                const data = await res.json();
+
+                resultContainer.innerHTML = ""; // Clear loading message
+
+                if (data.safe) {
+                    resultContainer.innerHTML = "<h3 style='color: green;'>Good news! No breaches found for this email.</h3>";
+                } else {
+                    let html = "<h3 style='color: red;'>Oh no! This email appeared in the following breaches:</h3><ul>";
+
+                    // Handle if breaches is a list of strings or objects
+                    // XposedOrNot usually returns a structure like { Breaches: [['Name', ...], ...] } or similar list
+                    // Let's adapt based on observation or generic handling
+                    const breaches = data.breaches;
+
+                    if (Array.isArray(breaches)) {
+                        breaches.forEach(breach => {
+                            // If breach is array (XposedOrNot sometimes returns array of arrays for breach details)
+                            // or object. Let's try to print a readable name.
+                            let breachName = breach;
+                            if (Array.isArray(breach) && breach.length > 0) {
+                                breachName = breach[0];
+                            } else if (typeof breach === 'object' && breach !== null) {
+                                breachName = breach.Name || breach.Title || JSON.stringify(breach);
+                            }
+
+                            html += `<li><strong>${breachName}</strong></li>`;
+                        });
+                    } else {
+                        html += `<li>${JSON.stringify(breaches)}</li>`;
+                    }
+
+                    html += "</ul><p>We recommend changing your password immediately.</p>";
+                    resultContainer.innerHTML = html;
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                resultContainer.innerHTML = "<p style='color: red;'>An error occurred while checking. Please try again.</p>";
+            }
+        }
+    </script>
+
+</body>
+
+</html>
