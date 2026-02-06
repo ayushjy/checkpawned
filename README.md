@@ -84,7 +84,7 @@ The backend uses `uv` for ultra-fast Python package management.
 1.  Clone Repository
     ```bash
     git clone https://github.com/ayushjy/checkpawned.git
-    cd ip_checker
+    cd checkpawned
     ```
 
 2.  Setup Backend Environment
